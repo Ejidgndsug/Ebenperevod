@@ -1,0 +1,1147 @@
+# Собирает приложение «Переводчик сайтов» в APK.
+# Готовый файл появится в разделе Releases этого репозитория.
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Signing key (same key for every build, so updates install over the old app)
+        run: |
+          mkdir -p ~/.android
+          echo "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" | base64 -d > ~/.android/debug.keystore
+
+      - name: Create project files
+        run: |
+          cat > settings.gradle <<'END_OF_FILE'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = 'SiteTranslator'
+          include ':app'
+          END_OF_FILE
+          cat > gradle.properties <<'END_OF_FILE'
+          org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          END_OF_FILE
+          mkdir -p app
+          cat > app/build.gradle <<'END_OF_FILE'
+          plugins {
+              id 'com.android.application' version '8.7.3'
+          }
+
+          android {
+              namespace 'ru.sitetranslator'
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId 'ru.sitetranslator'
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 3
+                  versionName '1.2'
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.webkit:webkit:1.11.0'
+          }
+          END_OF_FILE
+          mkdir -p app/src/main
+          cat > app/src/main/AndroidManifest.xml <<'END_OF_FILE'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <uses-permission android:name="android.permission.INTERNET" />
+
+              <application
+                  android:label="Переводчик сайтов"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:usesCleartextTraffic="true"
+                  android:hardwareAccelerated="true">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:launchMode="singleTask"
+                      android:windowSoftInputMode="adjustResize"
+                      android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|uiMode|density">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          END_OF_FILE
+          mkdir -p app/src/main/java/ru/sitetranslator
+          cat > app/src/main/java/ru/sitetranslator/MainActivity.java <<'END_OF_FILE'
+          package ru.sitetranslator;
+
+          import android.app.Activity;
+          import android.app.AlertDialog;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.graphics.Bitmap;
+          import android.graphics.Color;
+          import android.graphics.drawable.GradientDrawable;
+          import android.net.Uri;
+          import android.os.Bundle;
+          import android.text.InputType;
+          import android.view.Gravity;
+          import android.view.Menu;
+          import android.view.MotionEvent;
+          import android.view.View;
+          import android.webkit.CookieManager;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.ValueCallback;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.widget.EditText;
+          import android.widget.FrameLayout;
+          import android.widget.PopupMenu;
+          import android.widget.TextView;
+          import android.widget.Toast;
+
+          import androidx.webkit.WebViewCompat;
+          import androidx.webkit.WebViewFeature;
+
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+
+          import java.io.ByteArrayOutputStream;
+          import java.io.File;
+          import java.io.FileInputStream;
+          import java.io.FileOutputStream;
+          import java.io.InputStream;
+          import java.net.HttpURLConnection;
+          import java.net.URL;
+          import java.net.URLEncoder;
+          import java.nio.charset.StandardCharsets;
+          import java.util.ArrayList;
+          import java.util.Collections;
+          import java.util.Iterator;
+          import java.util.LinkedHashMap;
+          import java.util.List;
+          import java.util.Map;
+          import java.util.concurrent.ExecutorService;
+          import java.util.concurrent.Executors;
+          import java.util.concurrent.Future;
+          import java.util.concurrent.TimeUnit;
+
+          public class MainActivity extends Activity {
+              private static final int FILE_REQ = 1001;
+              private static final String UA = "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36";
+
+              private WebView web;
+              private TextView fab;
+              private SharedPreferences prefs;
+              private String script = "";
+              private boolean enabled = true;
+              private volatile boolean cacheDirty = false;
+              private ValueCallback<Uri[]> fileCallback;
+              private boolean allFrames = false;
+              private volatile int cmdSeq = 0;
+              private volatile String cmd = "";
+              private final ExecutorService pool = Executors.newFixedThreadPool(3);
+              private final Map<String, String> cache = Collections.synchronizedMap(
+                      new LinkedHashMap<String, String>(512, 0.75f, true) {
+                          @Override
+                          protected boolean removeEldestEntry(Map.Entry<String, String> e) {
+                              return size() > 6000;
+                          }
+                      });
+
+              @Override
+              protected void onCreate(Bundle state) {
+                  super.onCreate(state);
+                  prefs = getSharedPreferences("cfg", MODE_PRIVATE);
+                  enabled = prefs.getBoolean("enabled", true);
+                  script = readAsset("translator.js");
+                  pool.execute(this::loadCache);
+
+                  FrameLayout root = new FrameLayout(this);
+                  web = new WebView(this);
+                  root.addView(web, new FrameLayout.LayoutParams(-1, -1));
+                  fab = makeFab();
+                  int s = dp(40);
+                  FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(s, s, Gravity.END | Gravity.CENTER_VERTICAL);
+                  lp.rightMargin = dp(4);
+                  root.addView(fab, lp);
+                  setContentView(root);
+
+                  setupWeb();
+                  String url = prefs.getString("url", null);
+                  if (url == null) askUrl();
+                  else web.loadUrl(url);
+              }
+
+              // ---------------- WebView ----------------
+              private void setupWeb() {
+                  WebSettings ws = web.getSettings();
+                  ws.setJavaScriptEnabled(true);
+                  ws.setDomStorageEnabled(true);
+                  ws.setDatabaseEnabled(true);
+                  ws.setMediaPlaybackRequiresUserGesture(false);
+                  ws.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+                  ws.setLoadWithOverviewMode(true);
+                  ws.setUseWideViewPort(true);
+                  ws.setBuiltInZoomControls(true);
+                  ws.setDisplayZoomControls(false);
+                  ws.setJavaScriptCanOpenWindowsAutomatically(true);
+                  // look like normal Chrome so sites (and Google login) don't block the WebView
+                  String ua = ws.getUserAgentString().replace("; wv", "").replaceAll("Version/[\\d.]+ ", "");
+                  ws.setUserAgentString(ua);
+
+                  CookieManager cm = CookieManager.getInstance();
+                  cm.setAcceptCookie(true);
+                  cm.setAcceptThirdPartyCookies(web, true);
+
+                  web.addJavascriptInterface(new Bridge(), "RTBridge");
+                  try {
+                      if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+                          WebViewCompat.addDocumentStartJavaScript(web, script, Collections.singleton("*"));
+                          allFrames = true;
+                      }
+                  } catch (Exception e) {
+                      lastError = "inject: " + e;
+                  }
+
+                  web.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
+                          Uri u = r.getUrl();
+                          String sc = u.getScheme();
+                          if ("http".equals(sc) || "https".equals(sc)) return false;
+                          try {
+                              Intent i = "intent".equals(sc)
+                                      ? Intent.parseUri(u.toString(), Intent.URI_INTENT_SCHEME)
+                                      : new Intent(Intent.ACTION_VIEW, u);
+                              startActivity(i);
+                          } catch (Exception ignored) {
+                          }
+                          return true;
+                      }
+
+                      @Override
+                      public void onPageStarted(WebView v, String url, Bitmap favicon) {
+                          super.onPageStarted(v, url, favicon);
+                      }
+
+                      @Override
+                      public void onPageFinished(WebView v, String url) {
+                          inject();
+                          CookieManager.getInstance().flush();
+                      }
+                  });
+
+                  web.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public void onProgressChanged(WebView v, int p) {
+                          if (p >= 30) inject();
+                      }
+
+                      @Override
+                      public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams params) {
+                          if (fileCallback != null) fileCallback.onReceiveValue(null);
+                          fileCallback = cb;
+                          try {
+                              startActivityForResult(params.createIntent(), FILE_REQ);
+                          } catch (Exception e) {
+                              fileCallback = null;
+                              return false;
+                          }
+                          return true;
+                      }
+                  });
+              }
+
+              private void inject() {
+                  web.evaluateJavascript(script, null);
+              }
+
+              /** Commands reach every frame (including iframes) through the bridge. */
+              private void sendCmd(String c) {
+                  cmd = c;
+                  cmdSeq++;
+              }
+
+              // ---------------- floating button + menu ----------------
+              private TextView makeFab() {
+                  TextView t = new TextView(this);
+                  t.setText("文");
+                  t.setTextColor(Color.WHITE);
+                  t.setTextSize(15);
+                  t.setGravity(Gravity.CENTER);
+                  GradientDrawable g = new GradientDrawable();
+                  g.setShape(GradientDrawable.OVAL);
+                  g.setColor(0xCC222222);
+                  t.setBackground(g);
+                  t.setAlpha(0.45f);
+                  t.setElevation(dp(4));
+                  t.setOnClickListener(v -> showMenu());
+                  t.setOnTouchListener(new View.OnTouchListener() {
+                      float dx, dy, sx, sy;
+                      boolean moved;
+
+                      @Override
+                      public boolean onTouch(View v, MotionEvent e) {
+                          switch (e.getActionMasked()) {
+                              case MotionEvent.ACTION_DOWN:
+                                  dx = v.getX() - e.getRawX();
+                                  dy = v.getY() - e.getRawY();
+                                  sx = e.getRawX();
+                                  sy = e.getRawY();
+                                  moved = false;
+                                  return true;
+                              case MotionEvent.ACTION_MOVE:
+                                  if (Math.abs(e.getRawX() - sx) + Math.abs(e.getRawY() - sy) > dp(10)) moved = true;
+                                  if (moved) {
+                                      v.setX(e.getRawX() + dx);
+                                      v.setY(e.getRawY() + dy);
+                                  }
+                                  return true;
+                              case MotionEvent.ACTION_UP:
+                                  if (!moved) v.performClick();
+                                  return true;
+                          }
+                          return false;
+                      }
+                  });
+                  return t;
+              }
+
+              private void showMenu() {
+                  PopupMenu pm = new PopupMenu(this, fab);
+                  Menu m = pm.getMenu();
+                  m.add(0, 1, 0, enabled ? "Выключить перевод (оригинал)" : "Включить перевод");
+                  m.add(0, 2, 1, "Мой текст → на английский");
+                  m.add(0, 3, 2, "Обновить страницу");
+                  m.add(0, 4, 3, "Сменить сайт");
+                  m.add(0, 5, 4, "Очистить кэш перевода");
+                  m.add(0, 6, 5, "Проверка перевода");
+                  pm.setOnMenuItemClickListener(item -> {
+                      switch (item.getItemId()) {
+                          case 1:
+                              enabled = !enabled;
+                              prefs.edit().putBoolean("enabled", enabled).apply();
+                              sendCmd(enabled ? "on" : "off");
+                              toast(enabled ? "Перевод включён" : "Показан оригинал");
+                              return true;
+                          case 2:
+                              sendCmd("input");
+                              return true;
+                          case 3:
+                              web.reload();
+                              return true;
+                          case 4:
+                              askUrl();
+                              return true;
+                          case 5:
+                              cache.clear();
+                              new File(getFilesDir(), "tcache.json").delete();
+                              web.reload();
+                              return true;
+                          case 6:
+                              runDiagnostics();
+                              return true;
+                      }
+                      return false;
+                  });
+                  pm.show();
+              }
+
+              private void askUrl() {
+                  final boolean first = !prefs.contains("url");
+                  final EditText et = new EditText(this);
+                  et.setHint("например: example.com");
+                  et.setSingleLine();
+                  et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+                  String cur = first ? "" : web.getUrl();
+                  et.setText(cur == null ? "" : cur);
+                  AlertDialog.Builder b = new AlertDialog.Builder(this)
+                          .setTitle("Адрес сайта")
+                          .setView(et)
+                          .setCancelable(!first)
+                          .setPositiveButton("Открыть", (d, w) -> {
+                              String u = et.getText().toString().trim();
+                              if (u.isEmpty()) {
+                                  if (first) askUrl();
+                                  return;
+                              }
+                              if (!u.matches("(?i)^https?://.*")) u = "https://" + u;
+                              prefs.edit().putString("url", u).apply();
+                              web.loadUrl(u);
+                          });
+                  if (!first) b.setNegativeButton("Отмена", null);
+                  b.show();
+              }
+
+              // ---------------- JS bridge ----------------
+              public class Bridge {
+                  @JavascriptInterface
+                  public void translate(final String id, final String json, final String tl) {
+                      pool.execute(() -> {
+                          JSONArray out = new JSONArray();
+                          boolean any = false, allFailed = true;
+                          try {
+                              JSONArray in = new JSONArray(json);
+                              List<String> texts = new ArrayList<>();
+                              for (int i = 0; i < in.length(); i++) texts.add(in.optString(i, ""));
+                              String[] res = translateAll(texts, safeLang(tl));
+                              for (String r : res) {
+                                  any = true;
+                                  if (r != null) allFailed = false;
+                                  out.put(r == null ? JSONObject.NULL : r);
+                              }
+                          } catch (Exception e) {
+                              lastError = "bridge: " + e;
+                          }
+                          if (any && allFailed) reportFailure();
+                          final String js = "window.__rt&&window.__rt.done(" + JSONObject.quote(id) + "," + out + ")";
+                          runOnUiThread(() -> web.evaluateJavascript(js, null));
+                      });
+                  }
+
+                  @JavascriptInterface
+                  public boolean enabled() {
+                      return enabled;
+                  }
+
+                  @JavascriptInterface
+                  public int cmdSeq() {
+                      return cmdSeq;
+                  }
+
+                  @JavascriptInterface
+                  public String cmd() {
+                      return cmd;
+                  }
+
+                  @JavascriptInterface
+                  public void toast(final String msg) {
+                      runOnUiThread(() -> MainActivity.this.toast(msg));
+                  }
+              }
+
+              private long lastFailToast = 0;
+
+              private void reportFailure() {
+                  long now = System.currentTimeMillis();
+                  if (now - lastFailToast < 20000) return;
+                  lastFailToast = now;
+                  final String err = lastError;
+                  runOnUiThread(() -> Toast.makeText(this, "Перевод не удался: " + err + "\nМеню 文 → «Проверка перевода»", Toast.LENGTH_LONG).show());
+              }
+
+              private static String safeLang(String tl) {
+                  return tl != null && tl.matches("[a-zA-Z-]{2,8}") ? tl : "ru";
+              }
+
+              // ---------------- translation: several Google endpoints, first that works wins ----------------
+              private volatile String lastError = "нет";
+              private volatile int goodBackend = 0;
+              private volatile boolean batchBroken = false;
+              private final ExecutorService net = Executors.newFixedThreadPool(6);
+              private static final String[] BACKEND_NAMES = {
+                      "translate.googleapis.com (gtx)",
+                      "clients5.google.com (chrome)",
+                      "translate.google.com/m (страница)"
+              };
+
+              private String[] translateAll(List<String> texts, String tl) {
+                  String[] res = new String[texts.size()];
+                  List<Integer> miss = new ArrayList<>();
+                  for (int i = 0; i < texts.size(); i++) {
+                      String c = cache.get(tl + "\u0001" + texts.get(i));
+                      if (c != null) res[i] = c;
+                      else miss.add(i);
+                  }
+                  if (miss.isEmpty()) return res;
+
+                  // 1) try one request for many texts
+                  if (!batchBroken && miss.size() > 1) {
+                      int i = 0;
+                      while (i < miss.size()) {
+                          List<Integer> chunk = new ArrayList<>();
+                          int len = 0;
+                          while (i < miss.size()) {
+                              int l = enc(texts.get(miss.get(i))).length() + 3;
+                              if (!chunk.isEmpty() && (len + l > 3500 || chunk.size() >= 40)) break;
+                              chunk.add(miss.get(i));
+                              len += l;
+                              i++;
+                          }
+                          if (chunk.size() < 2) continue;
+                          List<String> ct = new ArrayList<>();
+                          for (int idx : chunk) ct.add(texts.get(idx));
+                          String[] got = batch(ct, tl);
+                          if (got == null) {
+                              batchBroken = true;
+                              break;
+                          }
+                          for (int k = 0; k < chunk.size(); k++) put(res, chunk.get(k), ct.get(k), got[k], tl);
+                      }
+                  }
+
+                  // 2) whatever is left: one request per text, in parallel
+                  List<Future<String>> fs = new ArrayList<>();
+                  List<Integer> left = new ArrayList<>();
+                  for (int idx : miss) {
+                      if (res[idx] != null) continue;
+                      final String t = texts.get(idx);
+                      left.add(idx);
+                      fs.add(net.submit(() -> translateLong(t, tl)));
+                  }
+                  for (int k = 0; k < left.size(); k++) {
+                      String got = null;
+                      try {
+                          got = fs.get(k).get(60, TimeUnit.SECONDS);
+                      } catch (Exception ignored) {
+                      }
+                      put(res, left.get(k), texts.get(left.get(k)), got, tl);
+                  }
+                  return res;
+              }
+
+              private void put(String[] res, int idx, String src, String tr, String tl) {
+                  if (tr == null) return;
+                  res[idx] = tr;
+                  cache.put(tl + "\u0001" + src, tr);
+                  cacheDirty = true;
+              }
+
+              /** Several texts in one request. Returns null if the endpoint misbehaves. */
+              private String[] batch(List<String> texts, String tl) {
+                  String[] hosts = {
+                          "https://translate.googleapis.com/translate_a/t?client=gtx&sl=auto&dt=t&tl=",
+                          "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl="
+                  };
+                  for (String h : hosts) {
+                      try {
+                          StringBuilder u = new StringBuilder(h).append(tl);
+                          for (String t : texts) u.append("&q=").append(enc(t));
+                          String body = http(u.toString());
+                          if (body == null) continue;
+                          JSONArray arr = new JSONArray(body);
+                          if (arr.length() != texts.size()) continue;
+                          String[] out = new String[texts.size()];
+                          boolean ok = true;
+                          for (int k = 0; k < arr.length() && ok; k++) {
+                              String s = firstString(arr.get(k));
+                              if (s == null) ok = false;
+                              else out[k] = htmlDecode(s);
+                          }
+                          if (ok) return out;
+                      } catch (Exception e) {
+                          lastError = "batch: " + e.getClass().getSimpleName();
+                      }
+                  }
+                  return null;
+              }
+
+              /** Splits very long texts (long bot replies) into pieces. */
+              private String translateLong(String text, String tl) {
+                  if (text.length() <= 1500) return translateOne(text, tl);
+                  StringBuilder out = new StringBuilder();
+                  int start = 0;
+                  while (start < text.length()) {
+                      int end = Math.min(text.length(), start + 1500);
+                      if (end < text.length()) {
+                          int cut = Math.max(text.lastIndexOf('\n', end), Math.max(text.lastIndexOf(". ", end), text.lastIndexOf("! ", end)));
+                          if (cut > start + 300) end = cut + 1;
+                      }
+                      String part = translateOne(text.substring(start, end), tl);
+                      if (part == null) return null;
+                      out.append(part);
+                      if (end < text.length() && !part.endsWith("\n")) out.append(' ');
+                      start = end;
+                  }
+                  return out.toString();
+              }
+
+              private String translateOne(String text, String tl) {
+                  int first = goodBackend;
+                  for (int n = 0; n < BACKEND_NAMES.length; n++) {
+                      int b = (first + n) % BACKEND_NAMES.length;
+                      String r = backend(b, text, tl);
+                      if (r != null) {
+                          goodBackend = b;
+                          return r;
+                      }
+                  }
+                  return null;
+              }
+
+              private String backend(int b, String text, String tl) {
+                  try {
+                      switch (b) {
+                          case 0: {
+                              String body = http("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&dt=t&tl=" + tl + "&q=" + enc(text));
+                              if (body == null) return null;
+                              JSONArray segs = new JSONArray(body).optJSONArray(0);
+                              if (segs == null) return null;
+                              StringBuilder sb = new StringBuilder();
+                              for (int j = 0; j < segs.length(); j++) {
+                                  JSONArray s = segs.optJSONArray(j);
+                                  if (s != null && !s.isNull(0)) sb.append(s.optString(0, ""));
+                              }
+                              return sb.length() > 0 ? sb.toString() : null;
+                          }
+                          case 1: {
+                              String body = http("https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" + tl + "&q=" + enc(text));
+                              if (body == null) return null;
+                              String s = firstString(new JSONArray(body));
+                              return s == null ? null : htmlDecode(s);
+                          }
+                          case 2: {
+                              String body = http("https://translate.google.com/m?sl=auto&hl=ru&tl=" + tl + "&q=" + enc(text));
+                              if (body == null) return null;
+                              java.util.regex.Matcher m = java.util.regex.Pattern
+                                      .compile("class=\"result-container\">(.*?)</div>", java.util.regex.Pattern.DOTALL)
+                                      .matcher(body);
+                              if (!m.find()) {
+                                  lastError = "страница перевода изменилась";
+                                  return null;
+                              }
+                              return htmlDecode(m.group(1).replaceAll("<br\\s*/?>", "\n"));
+                          }
+                      }
+                  } catch (Exception e) {
+                      lastError = BACKEND_NAMES[b] + ": " + e.getClass().getSimpleName();
+                  }
+                  return null;
+              }
+
+              /** Digs out the first string in nested JSON arrays: "x", ["x","en"], [["x","en"]] ... */
+              private static String firstString(Object o) throws org.json.JSONException {
+                  for (int depth = 0; depth < 4; depth++) {
+                      if (o instanceof String) return (String) o;
+                      if (!(o instanceof JSONArray) || ((JSONArray) o).length() == 0) return null;
+                      o = ((JSONArray) o).get(0);
+                  }
+                  return null;
+              }
+
+              private String http(String url) {
+                  HttpURLConnection c = null;
+                  String host = "";
+                  try {
+                      URL u = new URL(url);
+                      host = u.getHost();
+                      c = (HttpURLConnection) u.openConnection();
+                      c.setConnectTimeout(8000);
+                      c.setReadTimeout(15000);
+                      c.setRequestProperty("User-Agent", UA);
+                      int code = c.getResponseCode();
+                      if (code != 200) {
+                          lastError = host + ": HTTP " + code;
+                          return null;
+                      }
+                      try (InputStream in = c.getInputStream()) {
+                          return new String(readAll(in), StandardCharsets.UTF_8);
+                      }
+                  } catch (Exception e) {
+                      lastError = host + ": " + e.getClass().getSimpleName() + (e.getMessage() != null ? " " + e.getMessage() : "");
+                      return null;
+                  } finally {
+                      if (c != null) c.disconnect();
+                  }
+              }
+
+              private static String enc(String s) {
+                  try {
+                      return URLEncoder.encode(s, "UTF-8");
+                  } catch (Exception e) {
+                      return "";
+                  }
+              }
+
+              private static String htmlDecode(String s) {
+                  if (s.indexOf('&') < 0) return s;
+                  java.util.regex.Matcher m = java.util.regex.Pattern.compile("&#(x?)([0-9a-fA-F]+);").matcher(s);
+                  StringBuffer sb = new StringBuffer();
+                  while (m.find()) {
+                      int cp;
+                      try {
+                          cp = Integer.parseInt(m.group(2), m.group(1).isEmpty() ? 10 : 16);
+                      } catch (Exception e) {
+                          cp = '?';
+                      }
+                      m.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(new String(Character.toChars(cp))));
+                  }
+                  m.appendTail(sb);
+                  return sb.toString().replace("&quot;", "\"").replace("&lt;", "<").replace("&gt;", ">")
+                          .replace("&nbsp;", " ").replace("&amp;", "&");
+              }
+
+              // ---------------- diagnostics ----------------
+              private void runDiagnostics() {
+                  toast("Проверяю…");
+                  web.evaluateJavascript("(function(){var f=document.querySelectorAll('iframe').length;return (window.RTBridge?'мост есть':'НЕТ моста')+', скрипт '+(window.__rt?'работает':'НЕ запущен')+', окон внутри: '+f})()", jsState0 -> {
+                      final String jsState = jsState0 + (allFrames ? ", перевод во всех окнах" : ", ⚠ только главное окно (обнови Android System WebView)");
+                          net.execute(() -> {
+                              StringBuilder sb = new StringBuilder();
+                              sb.append("Страница: ").append(jsState).append("\n\n");
+                              for (int b = 0; b < BACKEND_NAMES.length; b++) {
+                                  lastError = "";
+                                  String r = backend(b, "Hello, my friend!", "ru");
+                                  sb.append(r != null ? "✅ " : "❌ ").append(BACKEND_NAMES[b]).append("\n   ")
+                                          .append(r != null ? r : lastError).append("\n");
+                              }
+                              lastError = "";
+                              String[] bt = batch(java.util.Arrays.asList("Good morning", "World map"), "ru");
+                              sb.append(bt != null ? "✅ пакетный: " + bt[0] + " / " + bt[1] : "❌ пакетный: " + lastError);
+                              final String msg = sb.toString();
+                              runOnUiThread(() -> new AlertDialog.Builder(this)
+                                      .setTitle("Проверка перевода")
+                                      .setMessage(msg)
+                                      .setPositiveButton("OK", null)
+                                      .show());
+                          });
+                  });
+              }
+
+              // ---------------- persistent cache (faster + no flicker next time) ----------------
+              private void loadCache() {
+                  File f = new File(getFilesDir(), "tcache.json");
+                  if (!f.exists()) return;
+                  try (InputStream in = new FileInputStream(f)) {
+                      JSONObject o = new JSONObject(new String(readAll(in), StandardCharsets.UTF_8));
+                      Iterator<String> it = o.keys();
+                      while (it.hasNext()) {
+                          String k = it.next();
+                          cache.put(k, o.getString(k));
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              private void saveCache() {
+                  if (!cacheDirty) return;
+                  cacheDirty = false;
+                  final JSONObject o;
+                  synchronized (cache) {
+                      o = new JSONObject(new LinkedHashMap<>(cache));
+                  }
+                  pool.execute(() -> {
+                      File f = new File(getFilesDir(), "tcache.json");
+                      try (FileOutputStream out = new FileOutputStream(f)) {
+                          out.write(o.toString().getBytes(StandardCharsets.UTF_8));
+                      } catch (Exception ignored) {
+                      }
+                  });
+              }
+
+              // ---------------- lifecycle ----------------
+              @Override
+              protected void onActivityResult(int req, int res, Intent data) {
+                  super.onActivityResult(req, res, data);
+                  if (req == FILE_REQ && fileCallback != null) {
+                      fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(res, data));
+                      fileCallback = null;
+                  }
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (web.canGoBack()) web.goBack();
+                  else super.onBackPressed();
+              }
+
+              @Override
+              protected void onPause() {
+                  super.onPause();
+                  CookieManager.getInstance().flush();
+                  saveCache();
+              }
+
+              @Override
+              protected void onDestroy() {
+                  saveCache();
+                  pool.shutdown();
+                  net.shutdown();
+                  web.destroy();
+                  super.onDestroy();
+              }
+
+              // ---------------- helpers ----------------
+              private String readAsset(String name) {
+                  try (InputStream in = getAssets().open(name)) {
+                      return new String(readAll(in), StandardCharsets.UTF_8);
+                  } catch (Exception e) {
+                      return "";
+                  }
+              }
+
+              private static byte[] readAll(InputStream in) throws java.io.IOException {
+                  ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                  byte[] buf = new byte[16384];
+                  int n;
+                  while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+                  return bo.toByteArray();
+              }
+
+              private int dp(int v) {
+                  return Math.round(v * getResources().getDisplayMetrics().density);
+              }
+
+              private void toast(String s) {
+                  Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+              }
+          }
+          END_OF_FILE
+          mkdir -p app/src/main/assets
+          cat > app/src/main/assets/translator.js <<'END_OF_FILE'
+          (function () {
+            if (window.__rt) { window.__rt.scan(); return; }
+            var B = window.RTBridge;
+            if (!B) return;
+
+            var TL = 'ru';
+            var enabled = true;
+            try { enabled = B.enabled() !== false; } catch (e) {}
+            var store = new Map();      // text node -> {o: original, t: translated}
+            var attrStore = new Map();  // element -> {attr: {o, t}}
+            var cache = new Map();      // original text -> translation
+            var pending = new Map();    // original text -> [callbacks]
+            var queue = [];
+            var batches = {};
+            var seq = 0, inflight = 0, flushTimer = null;
+            var charTimers = new Map();
+            var observed = new WeakSet();
+            var lastEditable = null;
+
+            var SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, CODE: 1, IFRAME: 1, CANVAS: 1, TEMPLATE: 1, INPUT: 1, KBD: 1 };
+            var ATTRS = ['placeholder', 'title', 'alt'];
+            var LETTER = /\p{L}/u, LETTERS = /\p{L}/gu, CYR = /[Ѐ-ӿ]/g;
+
+            function needs(s) {
+              if (!s) return false;
+              var t = s.trim();
+              if (t.length < 2 || !LETTER.test(t)) return false;
+              if (/^(https?:\/\/|www\.)\S+$/i.test(t)) return false;
+              var letters = (t.match(LETTERS) || []).length;
+              var cyr = (t.match(CYR) || []).length;
+              return cyr / letters < 0.3;
+            }
+
+            function editableAncestor(el) {
+              while (el && el.nodeType === 1) {
+                if (el.isContentEditable) return true;
+                el = el.parentElement;
+              }
+              return false;
+            }
+
+            function skipEl(el) {
+              return !!SKIP[el.nodeName] || el.isContentEditable;
+            }
+
+            // ---------- translation queue ----------
+            function request(text, cb) {
+              if (cache.has(text)) { cb(cache.get(text)); return; }
+              var list = pending.get(text);
+              if (list) { list.push(cb); return; }
+              pending.set(text, [cb]);
+              queue.push(text);
+              schedule();
+            }
+
+            function schedule() {
+              if (flushTimer) return;
+              flushTimer = setTimeout(function () { flushTimer = null; flush(); }, 120);
+            }
+
+            function flush() {
+              while (queue.length && inflight < 3) {
+                var batch = [], size = 0;
+                while (queue.length && batch.length < 40 && (size < 3000 || !batch.length)) {
+                  var t = queue.shift();
+                  batch.push(t); size += t.length;
+                }
+                var id = String(++seq);
+                batches[id] = batch;
+                inflight++;
+                try { B.translate(id, JSON.stringify(batch), TL); }
+                catch (e) { inflight--; delete batches[id]; batch.forEach(function (t) { pending.delete(t); }); }
+              }
+            }
+
+            function done(id, arr) {
+              var batch = batches[id];
+              delete batches[id];
+              inflight = Math.max(0, inflight - 1);
+              if (batch) {
+                for (var i = 0; i < batch.length; i++) {
+                  var text = batch[i], tr = arr && arr[i];
+                  var cbs = pending.get(text) || [];
+                  pending.delete(text);
+                  if (typeof tr === 'string') cache.set(text, tr);
+                  else tr = null; // failed: callers will retry on a later scan
+                  cbs.forEach(function (cb) { try { cb(tr); } catch (e) {} });
+                }
+              }
+              if (queue.length) flush();
+            }
+
+            function splitWs(s) {
+              var lead = s.match(/^\s*/)[0];
+              var trail = s.slice(lead.length).match(/\s*$/)[0];
+              return [lead, trail];
+            }
+
+            // ---------- text nodes ----------
+            function handleText(n) {
+              var p = n.parentNode;
+              if (!p || p.nodeType !== 1 || skipEl(p) || editableAncestor(p)) return;
+              var cur = n.data;
+              var rec = store.get(n);
+              if (rec) {
+                if (cur === rec.t) return;
+                if (cur === rec.o) {
+                  if (!enabled) return;
+                  if (rec.t != null) n.data = rec.t;
+                  else if (!rec.req) textReq(n, rec);
+                  return;
+                }
+              }
+              if (!needs(cur)) { if (rec) store.delete(n); return; }
+              rec = { o: cur, t: null, req: false };
+              store.set(n, rec);
+              if (enabled) textReq(n, rec);
+            }
+
+            function textReq(n, rec) {
+              rec.req = true;
+              var ws = splitWs(rec.o);
+              request(rec.o.trim(), function (tr) {
+                rec.req = false;
+                if (tr == null || store.get(n) !== rec) return;
+                rec.t = ws[0] + tr + ws[1];
+                if (enabled && n.data === rec.o) n.data = rec.t;
+              });
+            }
+
+            // ---------- attributes ----------
+            function handleAttr(el, name) {
+              var cur = el.getAttribute(name);
+              var recs = attrStore.get(el);
+              var rec = recs && recs[name];
+              if (rec) {
+                if (cur === rec.t) return;
+                if (cur === rec.o) {
+                  if (!enabled) return;
+                  if (rec.t != null) el.setAttribute(name, rec.t);
+                  else if (!rec.req) attrReq(el, name, recs, rec);
+                  return;
+                }
+              }
+              if (!needs(cur)) return;
+              if (!recs) { recs = {}; attrStore.set(el, recs); }
+              rec = recs[name] = { o: cur, t: null, req: false };
+              if (enabled) attrReq(el, name, recs, rec);
+            }
+
+            function attrReq(el, name, recs, rec) {
+              rec.req = true;
+              request(rec.o.trim(), function (tr) {
+                rec.req = false;
+                if (tr == null || recs[name] !== rec) return;
+                rec.t = tr;
+                if (enabled && el.getAttribute(name) === rec.o) el.setAttribute(name, tr);
+              });
+            }
+
+            function attrsOnly(el) {
+              for (var i = 0; i < ATTRS.length; i++) if (el.hasAttribute(ATTRS[i])) handleAttr(el, ATTRS[i]);
+              if (el.nodeName === 'INPUT' && /^(button|submit|reset)$/i.test(el.type) && el.hasAttribute('value')) handleAttr(el, 'value');
+            }
+
+            function handleElement(el) {
+              attrsOnly(el);
+              if (el.shadowRoot) { observe(el.shadowRoot); scan(el.shadowRoot); }
+            }
+
+            // ---------- scanning ----------
+            function scan(root) {
+              root = root || document.body;
+              if (!root) return;
+              if (root.nodeType === 3) { handleText(root); return; }
+              if (root.nodeType === 1) {
+                if (skipEl(root)) { attrsOnly(root); return; }
+                handleElement(root);
+              }
+              var w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+                acceptNode: function (n) {
+                  if (n.nodeType === 1 && skipEl(n)) { attrsOnly(n); return NodeFilter.FILTER_REJECT; }
+                  return NodeFilter.FILTER_ACCEPT;
+                }
+              });
+              var n;
+              while ((n = w.nextNode())) {
+                if (n.nodeType === 3) handleText(n); else handleElement(n);
+              }
+            }
+
+            function onMutations(muts) {
+              for (var i = 0; i < muts.length; i++) {
+                var m = muts[i];
+                if (m.type === 'childList') {
+                  for (var j = 0; j < m.addedNodes.length; j++) {
+                    var a = m.addedNodes[j];
+                    if (a.nodeType === 1 || a.nodeType === 3) scan(a);
+                  }
+                } else if (m.type === 'characterData') {
+                  debounceText(m.target);
+                } else if (m.type === 'attributes') {
+                  handleAttr(m.target, m.attributeName);
+                }
+              }
+            }
+
+            // streaming bot replies change the same text node many times: wait until it settles
+            function debounceText(n) {
+              var rec = store.get(n);
+              if (rec && (n.data === rec.t || n.data === rec.o)) { handleText(n); return; }
+              clearTimeout(charTimers.get(n));
+              charTimers.set(n, setTimeout(function () { charTimers.delete(n); handleText(n); }, 700));
+            }
+
+            function observe(root) {
+              if (observed.has(root)) return;
+              observed.add(root);
+              new MutationObserver(onMutations).observe(root, {
+                childList: true, subtree: true, characterData: true,
+                attributes: true, attributeFilter: ATTRS.concat(['value'])
+              });
+            }
+
+            // ---------- toggle ----------
+            function setEnabled(on) {
+              enabled = !!on;
+              store.forEach(function (rec, n) {
+                if (!n.isConnected) { store.delete(n); return; }
+                if (!enabled && n.data === rec.t) n.data = rec.o;
+              });
+              attrStore.forEach(function (recs, el) {
+                if (!el.isConnected) { attrStore.delete(el); return; }
+                if (enabled) return;
+                for (var k in recs) if (el.getAttribute(k) === recs[k].t) el.setAttribute(k, recs[k].o);
+              });
+              if (enabled) scan(document.body);
+            }
+
+            // ---------- translate what the user typed (RU -> EN) ----------
+            document.addEventListener('focusin', function (e) {
+              var el = e.target;
+              if (el && (el.nodeName === 'TEXTAREA' || (el.nodeName === 'INPUT' && /^(text|search|)$/i.test(el.type)) || el.isContentEditable)) lastEditable = el;
+            }, true);
+
+            function translateInput() {
+              var el = lastEditable;
+              if (!el || !el.isConnected) { B.toast('Сначала нажми на поле ввода'); return; }
+              var isField = el.nodeName === 'TEXTAREA' || el.nodeName === 'INPUT';
+              var text = isField ? el.value : el.innerText;
+              if (!text || !text.trim()) { B.toast('Поле пустое'); return; }
+              var id = 'in' + (++seq);
+              batches[id] = null;
+              window.__rt._inputCb = function (tr) {
+                if (typeof tr !== 'string') { B.toast('Не удалось перевести'); return; }
+                el.focus();
+                if (isField) {
+                  var proto = el.nodeName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+                  Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, tr);
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
+                  el.dispatchEvent(new Event('change', { bubbles: true }));
+                } else {
+                  document.execCommand('selectAll', false, null);
+                  document.execCommand('insertText', false, tr);
+                }
+              };
+              B.translate(id, JSON.stringify([text]), 'en');
+            }
+
+            window.__rt = {
+              scan: function () { if (document.body) { observe(document.body); scan(document.body); } },
+              done: function (id, arr) {
+                if (id.indexOf('in') === 0) { delete batches[id]; var cb = window.__rt._inputCb; window.__rt._inputCb = null; if (cb) cb(arr && arr[0]); return; }
+                done(id, arr);
+              },
+              setEnabled: setEnabled,
+              translateInput: translateInput
+            };
+
+            // menu commands arrive through the bridge, so they reach iframes too
+            var mySeq = 0;
+            try { mySeq = B.cmdSeq(); } catch (e) {}
+            function pollCmd() {
+              var s;
+              try { s = B.cmdSeq(); } catch (e) { return; }
+              if (s === mySeq) return;
+              mySeq = s;
+              var c = B.cmd();
+              if (c === 'on') setEnabled(true);
+              else if (c === 'off') setEnabled(false);
+              else if (c === 'input' && lastEditable && lastEditable.isConnected && document.hasFocus()) translateInput();
+            }
+
+            function start() {
+              window.__rt.scan();
+              setInterval(function () { if (enabled) window.__rt.scan(); }, 2000);
+              setInterval(pollCmd, 400);
+            }
+            if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+          })();
+          END_OF_FILE
+
+      - name: Build APK
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk SiteTranslator.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SiteTranslator
+          path: SiteTranslator.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Переводчик сайтов (сборка ${{ github.run_number }})
+          files: SiteTranslator.apk
